@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Juego de Memoria</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f8ff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    #contador {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 100px);
+      gap: 15px;
+    }
+
+    .card {
+      width: 100px;
+      height: 100px;
+      perspective: 600px;
+      cursor: pointer;
+    }
+
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+    }
+
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em;
+      color: white;
+    }
+
+    .card-front {
+      background: #333;
+    }
+
+    .card-back {
+      background: #4caf50;
+      transform: rotateY(180deg);
+    }
+
+    .flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .matched {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Juego de Memoria 🎮</h1>
+  <div id="contador">Coincidencias: 0</div>
+  <div class="grid" id="tablero"></div>
+
+  <script>
+    const emojis = ['🍎','🍌','🍇','🍓','🍍','🍉','🍒','🍑'];
+    const cartas = [...emojis, ...emojis].sort(() => 0.5 - Math.random());
+    const tablero = document.getElementById('tablero');
+    const contador = document.getElementById('contador');
+    let seleccionadas = [];
+    let coincidencias = 0;
+
+    cartas.forEach((emoji, index) => {
+      const card = document.createElement('div');
+      card.classList.add('card');
+      card.dataset.emoji = emoji;
+
+      card.innerHTML = `
+        <div class="card-inner">
+          <div class="card-front">?</div>
+          <div class="card-back">${emoji}</div>
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
+
+        card.classList.add('flipped');
+        seleccionadas.push(card);
+
+        if (seleccionadas.length === 2) {
+          const [c1, c2] = seleccionadas;
+          if (c1.dataset.emoji === c2.dataset.emoji) {
+            c1.classList.add('matched');
+            c2.classList.add('matched');
+            coincidencias++;
+            contador.textContent = `Coincidencias: ${coincidencias}`;
+            if (coincidencias === emojis.length) {
+              setTimeout(() => alert('¡Ganaste! 🎉'), 500);
+            }
+          } else {
+            setTimeout(() => {
+              c1.classList.remove('flipped');
+              c2.classList.remove('flipped');
+            }, 1000);
+          }
+          seleccionadas = [];
+        }
+      });
+
+      tablero.appendChild(card);
+    });
+  </script>
+
+</body>
+</html>
